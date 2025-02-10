@@ -295,12 +295,12 @@ async function checkAndBook(browser) {
 
 (async () => {
   try {
-    const browser = await puppeteer.launch({
-      headless: false,
-      // Specify executablePath if needed in your environment:
-      // executablePath: process.env.CHROME_BIN || '/usr/bin/google-chrome',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+const browser = await puppeteer.launch({
+  headless: true,
+  executablePath: process.env.CHROME_BIN || '/usr/bin/chromium-browser',
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
+
     let booked = false;
     
     console.log("Starting appointment booking process...");
