@@ -5,8 +5,8 @@ const cron = require('node-cron');
 const fs = require('fs');
 
 // --- Pushover notification setup ---
-// Replace these with your actual Pushover App Token and your User Key.
-const PUSHOVER_APP_TOKEN = 'a1mn48e6h4a4t7rmyqzepudiq73ozt';
+// Replace these with your actual Pushover App Token and User Key.
+const PUSHOVER_APP_TOKEN = 'ate7i8mwaxtznrnfcu2ri5kgy6kady';
 const PUSHOVER_USER_KEY = 'u5kcs5stos8hxa6dut8785jkxxtmn7';
 
 // Global variable to track if an appointment was booked in the last 24 hours.
@@ -17,7 +17,7 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection:', reason);
 });
 
-// Function to send a Pushover notification.
+// Function to send a Pushover notification using Axios.
 async function sendPushoverNotification(message) {
   const url = 'https://api.pushover.net/1/messages.json';
   try {
@@ -29,20 +29,20 @@ async function sendPushoverNotification(message) {
     console.log("Pushover notification sent:", response.data);
   } catch (error) {
     console.error("Error sending Pushover notification:", error);
+    // Continue running even if notification fails.
   }
 }
 
-// Send a startup notification (once)
+// Send a startup notification (once).
 sendPushoverNotification("🟢 Appointment booking script started!");
 
-// Schedule a daily report at midnight (server time)
+// Schedule a daily report at midnight (server time).
 cron.schedule('0 0 * * *', () => {
   const reportMessage = appointmentBookedInLast24Hours
     ? "📢 Daily Report: An appointment was booked in the last 24 hours! ✅"
     : "📢 Daily Report: No appointment was booked in the last 24 hours. ❌";
   sendPushoverNotification(reportMessage);
-  // Reset the flag for the next 24-hour period.
-  appointmentBookedInLast24Hours = false;
+  appointmentBookedInLast24Hours = false; // Reset for the next 24 hours.
 });
 
 // --- Utility functions ---
@@ -165,7 +165,6 @@ async function checkAndBook(browser) {
   
   await page.screenshot({ path: 'step1_details.png' });
   
-  // Click Next on personal details page (container: #step1-next-btn)
   console.log("Clicking Next on personal details page...");
   try {
     await clickNextStep(page, '#step1-next-btn');
@@ -296,7 +295,12 @@ async function checkAndBook(browser) {
 
 (async () => {
   try {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+      headless: false,
+      // Specify executablePath if needed in your environment:
+      // executablePath: process.env.CHROME_BIN || '/usr/bin/google-chrome',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     let booked = false;
     
     console.log("Starting appointment booking process...");
@@ -325,3 +329,4 @@ async function checkAndBook(browser) {
     console.error("Error in main process:", err);
   }
 })();
+
